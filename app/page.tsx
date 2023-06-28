@@ -1,113 +1,133 @@
-import Image from 'next/image'
+'use client'
+import React, { useState, useEffect } from 'react';
+import './Scatterplot.css'; // Import the CSS file for styling
 
-export default function Home() {
+interface DataPoint {
+  [key: string]: number | string;
+  label: string;
+}
+
+const Scatterplot = () => {
+  // Dummy data for the scatterplot
+  const data: DataPoint[] = [
+    { x1: 1, y1: 15, x2: 30, y2: 80, label: 'Data Point 1' },
+    { x1: 2, y1: 9, x2: 40, y2: 60, label: 'Data Point 2' },
+    { x1: 3, y1: 7, x2: 50, y2: 30, label: 'Data Point 3' },
+    { x1: 4, y1: 13, x2: 60, y2: 70, label: 'Data Point 4' },
+    { x1: 5, y1: 8, x2: 20, y2: 90, label: 'Data Point 5' },
+  ];
+
+  const [selectedX, setSelectedX] = useState('x1'); // Initial selected X indicator
+  const [selectedY, setSelectedY] = useState('y1'); // Initial selected Y indicator
+  const [isClient, setIsClient] = useState(false); // State to track client-side rendering
+
+  useEffect(() => {
+    setIsClient(true); // Set isClient to true when the component is mounted on the client-side
+  }, []);
+
+  const handleXIndicatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedX(e.target.value);
+  };
+
+  const handleYIndicatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedY(e.target.value);
+  };
+
+  if (!isClient) {
+    return null; // If not on the client-side, return null to avoid rendering the component
+  }
+
+  // Find the minimum and maximum values for x and y indicators
+  const xValues = data.map(point => point[selectedX] as number);
+  const yValues = data.map(point => point[selectedY] as number);
+  const xMin = Math.min(...xValues);
+  const xMax = Math.max(...xValues);
+  const yMin = Math.min(...yValues);
+  const yMax = Math.max(...yValues);
+
+  const margin = 20; // Margin between points and graph edges
+  const tickCount = 5; // Number of tick values
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="scatterplot-container">
+      <h2>Scatterplot with Dummy Data</h2><br></br>
+
+      <div className="scatterplot" style={{ margin: `${margin}px` }}>
+        {data.map((point, index) => (
+          <div
+            key={index}
+            className="scatterplot-point"
+            style={{
+              left: `${
+                ((point[selectedX] as number - xMin) / (xMax - xMin)) * 100
+              }%`,
+              bottom: `${
+                ((point[selectedY] as number - yMin) / (yMax - yMin)) * 100
+              }%`,
+            }}
+            title={`${point.label} (${point[selectedX]}, ${point[selectedY]})`}
+          />
+        ))}
+
+        <div className="x-axis">
+          {Array.from({ length: tickCount }).map((_, index) => {
+            const tick = xMin + ((xMax - xMin) / (tickCount - 1)) * index;
+            return (
+              <div
+                key={index}
+                className="x-tick"
+                style={{
+                  left: `${
+                    ((tick - xMin) / (xMax - xMin)) * 100
+                  }%`,
+                }}
+              >
+                {tick}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="y-axis">
+          {Array.from({ length: tickCount }).map((_, index) => {
+            const tick = yMin + ((yMax - yMin) / (tickCount - 1)) * index;
+            return (
+              <div
+                key={index}
+                className="y-tick"
+                style={{
+                  bottom: `${
+                    ((tick - yMin) / (yMax - yMin)) * 100
+                  }%`,
+                }}
+              >
+                {tick}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      <br></br>
+      <div className="scatterplot-axis-titles">
+        <div className="axis-title-x">
+          <span>X Axis:</span>
+          <select value={selectedX} onChange={handleXIndicatorChange}>
+            <option value="x1">X1</option>
+            <option value="x2">X2</option>
+          </select>
+        </div>
+
+        <div className="axis-title-y">
+          <span>Y Axis:</span>
+          <select value={selectedY} onChange={handleYIndicatorChange}>
+            <option value="y1">Y1</option>
+            <option value="y2">Y2</option>
+          </select>
+        </div>
       </div>
+    </div>
+  );
+};
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+export default Scatterplot;
