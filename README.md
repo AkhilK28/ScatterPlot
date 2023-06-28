@@ -1,3 +1,3 @@
 ## ScatterPlot
 
-Dynamic Axis with X and Y Indicator Drop Downs
+Dynamic Scatterplot with User Selections
